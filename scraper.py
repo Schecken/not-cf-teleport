@@ -1,40 +1,4 @@
 #!/usr/bin/env python3
-"""
-Proxy scraper and Cloudflare cache checker.
-
-This script has two sub-commands:
-
-1. scrape
-   Gather proxies from various online sources, test them against Cloudflare’s trace
-   endpoint, and save (or update) a JSON file with only the validated proxies.
-   The JSON is grouped by country and data center (colo). It also shows which Cloudflare
-   data centers (colos) are missing at least one working proxy if the option is set.
-
-   Usage examples:
-     - Overwrite mode:
-         python3 scraper.py scrape -o validated-proxies.json
-     - Update mode (merge new validated proxies into an existing file):
-         python3 scraper.py scrape -add validated-proxies.json
-     Additional options:
-         -v, --verbose     : Enable verbose output (debug info).
-         --show-missing    : After testing, print a list of missing Cloudflare colos.
-
-2. check
-   Use a JSON file of validated proxies (generated in scrape mode) to test a given URL
-   (for example, an image URL hosted behind Cloudflare) and determine its cache status.
-   The script makes a request through one proxy per country/data-center group, prints a
-   line-by-line result (including the proxy used) and, finally, prints a summary showing
-   for each HIT the time since the cache was created (converted to “X mins Y seconds ago”)
-   along with the full location (city, country).
-
-   Usage example:
-         python3 scraper.py check -i validated-proxies.json -u https://github.githubassets.com/favicons/favicon.png
-   Additional option:
-         -v, --verbose : Enable verbose output.
-
-Run with -h or --help for more details on each sub-command.
-"""
-
 import collections
 import collections.abc
 if not hasattr(collections, 'Callable'):
