@@ -11,7 +11,7 @@ Doing so with a VPN would be way too slow and setting up a VPS in each of those 
 > This post is a bit of a writeup on my methodology. The python script will do the heavy lifting, scroll to the [bottom](https://github.com/Schecken/not-cf-teleport/README.md#proxy-scraper-and-cloudflare-cache-checker) to see usage.
 
 > [!CAUTION]
-> The hardest part with this is finding free proxies in every location there is a data center. My script relies in other sources to find proxies and I have not been able to reliably find them in all required locations.
+> The hardest part with this is finding free proxies in every location there is a data center. My script relies in other sources to find proxies and I have not been able to reliably find them in all required locations. If you have other sources for proxies that allows you to check cache in all of those locations, the logic of this should work and you should be successful.
 
 ## tl;dr
 1. Get a URL for a Signal attachment sent to a target user
