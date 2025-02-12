@@ -155,35 +155,99 @@ https://cdn2.signal.org/attachments/QAc4nhCbTtZShDHqWGl3
 ```
 
 # Step 2 & 3 - Find Proxies and Check Cache
-Through a bunch of back-and-forth with ChatGPT and testing, I eventually created a script that allows me to scrape a bunch of free proxies, validate that they work, and use them to find the last cache time on Cloudflare colos.
+Through a bunch of back-and-forth with ChatGPT and testing, I eventually created a script that allows me to scrape a bunch of free web proxies, validate that they work, and use them to find the last cache time on Cloudflare colos. After testing the HTTP proxies, I also added TOR proxies which came with a couple of constraints; they are always changing so you can't rely on them to be in particular places (just like the web proxies, I guess) and it's slow. I eventually got to the stage where I was able to change the exit node each time but TOR is renowned to be slow, just gotta deal with it.
 
 ## Proxy scraper and Cloudflare cache checker
+This project is a command‑line tool for scraping and validating proxies from multiple sources and then using those proxies (as well as TOR exit nodes) to check the cache status of a specified URL. It is especially useful for testing how Cloudflare is serving content across different regions and proxy types.
 
-This script has two sub-commands:
+### Features
+#### `scrape`
+Gather HTTP proxies from a variety of public sources (including ProxyScrape, Free Proxy List, ProxyNova, and more). The tool tests each proxy against Cloudflare's trace endpoint and groups the working proxies by country and data center (colo). You can then save or update a JSON file with the validated proxies.
 
-1. `scrape`
-   Gather proxies from various online sources, test them against Cloudflare’s trace endpoint, and save (or update) a JSON file with only the validated proxies. The JSON is grouped by country and data center (colo). It also shows which Cloudflare data centers (colos) are missing at least one working proxy if the option is set.
+#### `check`
+Test the cache status of a given URL using the validated HTTP proxies and/or TOR exit nodes. For HTTP proxies, the tool uses your validated JSON file and displays the proxy’s country, data center, and cache age. For TOR testing, it fetches TOR exit nodes from the Onionoo API, spawns temporary TOR instances (forcing a particular exit node), and extracts regional information (including the colo code from headers like X-Served-By or CF-Ray).
 
-   Usage examples:
-     - Overwrite mode:
-         `python3 scraper.py scrape -o validated-proxies.json`
-     - Update mode (merge new validated proxies into an existing file):
-         `python3 scraper.py scrape -add validated-proxies.json`
-     Additional options:
-        ` -v`, `--verbose`     : Enable verbose output (debug info).
-        ` --show-missing`    : After testing, print a list of missing Cloudflare colos.
+Concurrent Testing:
+Both HTTP and TOR checks are run concurrently to speed up the testing process. TOR tests are limited to a set number of simultaneous instances (configurable) to prevent overwhelming your system.
 
-2. `check`
-   Use a JSON file of validated proxies (generated in scrape mode) to test a given URL (for example, an image URL hosted behind Cloudflare) and determine its cache status. The script makes a request through one proxy per country/data-center group, prints a
-   line-by-line result (including the proxy used) and, finally, prints a summary showing for each HIT the time since the cache was created (converted to “X mins Y seconds ago”) along with the full location (city, country).
+### Prerequisites
+- Python 3.6+
+- Required Python packages (install via pip):
+```bash
+pip install requests rich beautifulsoup4 stem
+```
 
-   Usage example:
-         `python3 scraper.py check -i validated-proxies.json -u https://github.githubassets.com/favicons/favicon.png`
-   Additional option:
-         `-v`, `--verbose` : Enable verbose output.
+TOR:
+Ensure you have TOR installed and properly configured. For best results with TOR-based testing, add the following line to your torrc file:
+```bash
+sudo apt install tor
+```
+
+This enables SOCKS authentication isolation, ensuring that each connection gets its own circuit.
+```bash
+sudo echo "ControlPort 9051" >> /etc/tor/torrc
+sudo echo "CookieAuthentication 1" >> /etc/tor/torrc
+sudo echo "SocksPort 9050 IsolateSOCKSAuth" >> /etc/tor/torrc
+```
+
+### Usage
+The tool is run from the command line and supports two main subcommands: `scrape` and `check`.
 
 Run with `-h` or `--help` for more details on each sub-command.
 
-![image](https://github.com/user-attachments/assets/a91f0be2-29cd-49e6-a002-5f8972d4db9b)
+#### Scrape Mode
+Use the `scrape` command to gather proxies from multiple sources, test them, and save a validated JSON file.
+
+Overwrite:
+```bash
+python3 scraper.py scrape -o validated-proxies.json
+```
+
+Merge/Update:
+```bash
+python3 scraper.py scrape -add validated-proxies.json --verbose --show-missing
+```
+
+Valid options:
+`-o` : Output file
+`-add` : Add to existing file
+` -v`, `--verbose` : Enable verbose output (debug info).
+` --show-missing` : After testing, print a list of missing Cloudflare colos.
+
+
+#### Check Mode
+Use the check command to test a target URL’s cache status through proxies. You can choose to run HTTP tests (using your validated JSON file), TOR tests (which fetch TOR exit nodes from Onionoo), or both. HTTP tests run first, followed by TOR tests.
+
+HTTP Proxies Only:
+```bash
+python3 scraper.py check -i validated-proxies.json -u "https://example.com/resource.png" --http -v
+```
+
+TOR Exit Nodes Only:
+```bash
+python3 scraper.py check -u "https://example.com/resource.png" --tor -v
+```
+
+Both HTTP and TOR:
+```bash
+python3 scraper.py check -i validated-proxies.json -u "https://example.com/resource.png" --tor --http -v
+```
+
+Valid options:
+`-i`, `--input` : Input JSON file with validated HTTP proxies (required for `--http`)
+`-u`, `--url` : URL whose cache status should be checked
+`--tor` : Use TOR exit nodes (fetched from onionoo) for testing
+`--http` : Use HTTP proxies from the input file for testing
+`-v`, `--verbose` : Enable verbose output
+
+
+#### Output
+The tool prints a formatted table to the console. For HTTP tests, the output includes the index, status, country code, data center, proxy used, and the cache age (if available). For TOR tests, it displays the country, the colo (extracted from headers like X-Served-By or CF-Ray), a label (e.g., TOR (US)), and the cache age.
+
+**HTTP:**
+![image](https://github.com/user-attachments/assets/59e1cae4-52b1-466e-9535-1fd28dd5c000)
+
+**TOR:**
+![image](https://github.com/user-attachments/assets/b84def6f-9472-4f70-aafa-1de77d30e666)
 
 **Note:** you can add your own sources in the script, just make sure they are annotated as `text` or `html-ssl` as it will help with parsing. If the parsing doesn't work nicely (particularly if it's a webpage), you might have to create a new function to fix it.
