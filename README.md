@@ -220,17 +220,17 @@ Use the check command to test a target URL’s cache status through proxies. You
 
 HTTP Proxies Only:
 ```bash
-python3 scraper.py check -i validated-proxies.json -u "https://example.com/resource.png" --http -v
+python3 scraper.py check -i validated-proxies.json -u "https://github.githubassets.com/favicons/favicon.png" --http -v
 ```
 
 TOR Exit Nodes Only:
 ```bash
-python3 scraper.py check -u "https://example.com/resource.png" --tor -v
+python3 scraper.py check -u "https://github.githubassets.com/favicons/favicon.png" --tor -v
 ```
 
 Both HTTP and TOR:
 ```bash
-python3 scraper.py check -i validated-proxies.json -u "https://example.com/resource.png" --tor --http -v
+python3 scraper.py check -i validated-proxies.json -u "https://github.githubassets.com/favicons/favicon.png" --tor --http -v
 ```
 
 Valid options:
@@ -242,7 +242,7 @@ Valid options:
 
 
 #### Output
-The tool prints a formatted table to the console. For HTTP tests, the output includes the index, status, country code, data center, proxy used, and the cache age (if available). For TOR tests, it displays the country, the colo (extracted from headers like X-Served-By or CF-Ray), a label (e.g., TOR (US)), and the cache age.
+The tool prints a formatted table to the console. For HTTP tests, the output includes the index, status, country code, data center, proxy used, and the cache age (if available). For TOR tests, it displays the country, the colo (extracted from headers like `X-Served-By` or `CF-Ray`), a label (e.g., `TOR (US)`), and the cache age.
 
 **HTTP:**
 ![image](https://github.com/user-attachments/assets/59e1cae4-52b1-466e-9535-1fd28dd5c000)
