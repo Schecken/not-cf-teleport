@@ -236,7 +236,7 @@ python3 scraper.py check -i validated-proxies.json -u "https://example.com/resou
 Valid options:
 `-i`, `--input` : Input JSON file with validated HTTP proxies (required for `--http`)
 `-u`, `--url` : URL whose cache status should be checked
-`--tor` : Use TOR exit nodes (fetched from onionoo) for testing
+`--tor` : Use TOR exit nodes (fetched from onionoo) for testing. WARNING: this is slow!
 `--http` : Use HTTP proxies from the input file for testing
 `-v`, `--verbose` : Enable verbose output
 
