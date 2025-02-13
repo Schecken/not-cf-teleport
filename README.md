@@ -160,16 +160,6 @@ Through a bunch of back-and-forth with ChatGPT and testing, I eventually created
 ## Proxy scraper and Cloudflare cache checker
 This project is a command‑line tool for scraping and validating proxies from multiple sources and then using those proxies (as well as TOR exit nodes) to check the cache status of a specified URL. It is especially useful for testing how Cloudflare is serving content across different regions and proxy types.
 
-### Features
-#### `scrape`
-Gather HTTP proxies from a variety of public sources (including ProxyScrape, Free Proxy List, ProxyNova, and more). The tool tests each proxy against Cloudflare's trace endpoint and groups the working proxies by country and data center (colo). You can then save or update a JSON file with the validated proxies.
-
-#### `check`
-Test the cache status of a given URL using the validated HTTP proxies and/or TOR exit nodes. For HTTP proxies, the tool uses your validated JSON file and displays the proxy’s country, data center, and cache age. For TOR testing, it fetches TOR exit nodes from the Onionoo API, spawns temporary TOR instances (forcing a particular exit node), and extracts regional information (including the colo code from headers like X-Served-By or CF-Ray).
-
-Concurrent Testing:
-Both HTTP and TOR checks are run concurrently to speed up the testing process. TOR tests are limited to a set number of simultaneous instances (configurable) to prevent overwhelming your system.
-
 ### Prerequisites
 - Python 3.6+
 - Required Python packages (install via pip):
@@ -233,16 +223,16 @@ Both HTTP and TOR:
 python3 scraper.py check -i validated-proxies.json -u "https://github.githubassets.com/favicons/favicon.png" --tor --http -v
 ```
 
-Valid options:
-`-i`, `--input` : Input JSON file with validated HTTP proxies (required for `--http`)
-`-u`, `--url` : URL whose cache status should be checked
-`--tor` : Use TOR exit nodes (fetched from onionoo) for testing. WARNING: this is slow!
-`--http` : Use HTTP proxies from the input file for testing
+Valid options: \
+`-i`, `--input` : Input JSON file with validated HTTP proxies (required for `--http`) \
+`-u`, `--url` : URL whose cache status should be checked \
+`--tor` : Use TOR exit nodes (fetched from onionoo) for testing. **WARNING: this is slow!** \
+`--http` : Use HTTP proxies from the input file for testing \
 `-v`, `--verbose` : Enable verbose output
 
 
 #### Output
-The tool prints a formatted table to the console. For HTTP tests, the output includes the index, status, country code, data center, proxy used, and the cache age (if available). For TOR tests, it displays the country, the colo (extracted from headers like `X-Served-By` or `CF-Ray`), a label (e.g., `TOR (US)`), and the cache age.
+The tool prints a formatted table to the console. For HTTP tests, the output includes the index, status, country code, data center, proxy used, and the cache age (if available). For TOR tests, it displays the country, the colo (extracted from headers like `X-Served-By` or `Cf-Ray`), a label (e.g., `TOR (US)`), and the cache age.
 
 **HTTP:**
 ![image](https://github.com/user-attachments/assets/59e1cae4-52b1-466e-9535-1fd28dd5c000)
